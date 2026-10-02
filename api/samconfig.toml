@@ -1,0 +1,30 @@
+version = 0.1
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+resolve_s3 = true
+confirm_changeset = false
+fail_on_empty_changeset = false
+region = "eu-west-3"
+
+[staging.deploy.parameters]
+stack_name = "tasks-api-staging"
+capabilities = "CAPABILITY_IAM"
+resolve_s3 = true
+confirm_changeset = false
+fail_on_empty_changeset = false
+region = "eu-west-3"
+parameter_overrides = "Stage=staging"
+
+[production.deploy.parameters]
+stack_name = "tasks-api-production"
+capabilities = "CAPABILITY_IAM"
+resolve_s3 = true
+confirm_changeset = false
+fail_on_empty_changeset = false
+region = "eu-west-3"
+parameter_overrides = "Stage=production"

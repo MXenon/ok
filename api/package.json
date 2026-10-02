@@ -1,0 +1,63 @@
+{
+  "name": "tasks-api",
+  "version": "0.1.0",
+  "description": "API REST de gestion de tâches (Express) déployée sur AWS Lambda",
+  "private": true,
+  "main": "src/lambda.js",
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "eslint .",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:ci": "jest --ci --coverage --reporters=default --reporters=jest-junit",
+    "docs": "node scripts/generate-docs.js",
+    "release:patch": "node scripts/release.js patch",
+    "release:minor": "node scripts/release.js minor",
+    "release:major": "node scripts/release.js major"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "serverless-http": "^4.0.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^17.13.0",
+    "jest": "^30.5.2",
+    "jest-junit": "^17.0.0",
+    "supertest": "^7.3.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/server.js"
+    ],
+    "coverageDirectory": "reports/coverage",
+    "coverageReporters": [
+      "text-summary",
+      "lcov",
+      "cobertura"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 80,
+        "branches": 70
+      }
+    }
+  },
+  "jest-junit": {
+    "outputDirectory": "reports",
+    "outputName": "junit.xml"
+  }
+}
