@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Tasks API - API REST Node.js (Express) sur AWS Lambda + API Gateway HTTP API
+
+Parameters:
+  Stage:
+    Type: String
+    AllowedValues: [staging, production]
+    Default: staging
+  AppVersion:
+    Type: String
+    Description: Version issue de git (git describe --tags), ex. v1.2.0
+    Default: dev
+  GitCommit:
+    Type: String
+    Description: SHA court du commit déployé
+    Default: unknown
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [arm64]
+    MemorySize: 256
+    Timeout: 10
+    Tracing: Active
+
+Resources:
+  TasksApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub tasks-api-${Stage}
+      CodeUri: .
+      Handler: src/lambda.handler
+      # Chaque déploiement publie une version Lambda immuable ; l'alias "live" pointe vers la dernière.
+      AutoPublishAlias: live
+      VersionDescription: !Sub ${AppVersion} (${GitCommit})
+      Environment:
+        Variables:
+          NODE_ENV: production
+          STAGE: !Ref Stage
+          APP_VERSION: !Ref AppVersion
+          GIT_COMMIT: !Ref GitCommit
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TasksHttpApi
+            Path: /{proxy+}
+            Method: ANY
+        Root:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref TasksHttpApi
+            Path: /
+            Method: ANY
+
+  TasksHttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: $default
+
+  TasksApiLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/tasks-api-${Stage}
+      RetentionInDays: 30
+
+Outputs:
+  ApiUrl:
+    Description: URL publique de l'API
+    Value: !Sub https://${TasksHttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
+  FunctionVersion:
+    Description: Version Lambda publiée par ce déploiement
+    Value: !Ref TasksApiFunction.Version
